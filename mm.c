@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <cblas.h>
 
 #define MATSIZE 8000
 #define BLOCKSIZE 8
@@ -15,6 +16,8 @@ void abasicmm() ;
 void abettermm() ;
 void ablockmm() ;
 void checkmatmult() ;
+
+void current_utc_time(struct timespec *ts);
 
 int main(int argc, char *argv[])
 {
@@ -57,28 +60,33 @@ int main(int argc, char *argv[])
    setmat(n, n, aa) ;
 
 
-   srand(4.16) ; // set random seed (change to go off time stamp to make it better
+   srand(1) ; // set random seed (change to go off time stamp to make it better
 
    fillmat(n,n,b) ;
    fillmat(n,n,c) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts1) ;
+   current_utc_time(&ts1) ;
 // multiply matrices
    abasicmm (n,n,a,b,c) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts2) ;
+   current_utc_time(&ts2) ;
 
    setmat(n, n, a) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts3) ;
+   current_utc_time(&ts3) ;
 
    abettermm (n,n,a,b,c) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts4) ;
+   current_utc_time(&ts4) ;
 
    ablockmm (n, n, aa, b, c, blockSize) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts5) ;
+   current_utc_time(&ts5) ;
+
+   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+               n, n, n, 1.0, b, n, c, n, 0.0, a, n);
+
+   current_utc_time(&ts6) ;
 
    printf("matrix multplies complete \n") ; fflush(stdout) ;
 
@@ -86,7 +94,7 @@ int main(int argc, char *argv[])
    checkmatmult(n,n,a,aa) ;
 
    {
-      double t1, t2, t3, tmp ;
+      double t1, t2, t3, t4, tmp ;
       t1 =  ts2.tv_sec-ts1.tv_sec;
       tmp = ts2.tv_nsec-ts1.tv_nsec;
       tmp /= 1.0e+09 ;
@@ -102,6 +110,11 @@ int main(int argc, char *argv[])
       tmp /= 1.0e+09 ;
       t3 += tmp ;
       printf("ikj blocked time        %lf\n",t3) ;
+      t4 =  ts6.tv_sec-ts5.tv_sec;
+      tmp = ts6.tv_nsec-ts5.tv_nsec;
+      tmp /= 1.0e+09 ;
+      t4 += tmp ;
+      printf("cblas_dgemm             %lf\n",t4) ;
 
    }
 
@@ -215,14 +228,14 @@ int main(int argc, char *argv[])
    fillmat(n,n,b) ;
    fillmat(n,n,c) ;
 
-   clock_gettime(CLOCK_REALTIME, &ts1) ;
+   current_utc_time(&ts1) ;
 // multiply matrices
 
 
    ablockmm (n, n, a, b, c, blockSize) ;
-   clock_gettime(CLOCK_REALTIME, &ts2) ;
+   current_utc_time(&ts2) ;
    ablockmm (n, n, aa, b, c, blockSize) ;
-   clock_gettime(CLOCK_REALTIME, &ts3) ;
+   current_utc_time(&ts3) ;
 
    printf("matrix multplies complete \n") ; fflush(stdout) ;
 
