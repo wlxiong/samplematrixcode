@@ -178,11 +178,14 @@ void checkmatmult(int n,int m, double a[n][m], double aa[n][m])
 // crude check.  Never compare floating point or double with ==.
 // most floating point results are too sensitive to order of operations.
 // this worked(sizes up to about 4600) it was quick, in general this is not safe
-   int i, j ;
-for (i=0;i<n;i++)
-for (j=0;j<m;j++)
-   if (a[i][j]-aa[i][j] != 0.0) printf("diff i %d %d diff %lf\n",i,j,a[i][j]=aa[i][j]) ;
-printf("check OK\n") ;
+    int i, j ;
+    for (i=0;i<n;i++) {
+        for (j=0;j<m;j++) {
+            double diff = fabs(a[i][j]-aa[i][j]);
+            if (diff > 1e-6) printf("i %d j %d diff %lf\n", i, j, diff) ;
+        }
+    }
+    printf("check OK\n") ;
 }
 
 /**/
